@@ -68,7 +68,7 @@ If Porting Kit chooses a different path, pass that actual `.app` path.
 
 ## 3. Select D3DMetal
 
-In the GUI, select D3DMetal and avoid simultaneously enabling an alternate D3D10/D3D11 renderer. The repository script disables DXMT/DXVK when those keys exist, but deliberately leaves the template's D9VK/CNC_DDRAW defaults unchanged until an observed launcher/game symptom justifies changing older-API paths.
+In the GUI, select D3DMetal and avoid simultaneously enabling an alternate D3D10/D3D11 renderer. The repository script disables DXMT/DXVK when those keys exist.
 
 Or, for a Sikarugir wrapper with the standard plist layout:
 
