@@ -1,0 +1,124 @@
+# Step A — free stack baseline
+
+This is the first hands-on experiment. It deliberately avoids building Wine from source.
+
+## 1. Preflight
+
+From a clone of this repository:
+
+    bash scripts/doctor.sh
+
+The script does not install anything. It checks:
+
+- Apple Silicon;
+- macOS version;
+- Rosetta execution;
+- Homebrew;
+- Sikarugir / Porting Kit presence;
+- free disk space.
+
+Current Sikarugir upstream documents macOS 14.6+ and Rosetta 2 for Apple Silicon.
+
+If Sikarugir is not installed, use the current upstream Homebrew instructions rather than copying an old command from a forum:
+
+    brew upgrade
+    brew trust Sikarugir-App/sikarugir
+    brew install --cask Sikarugir-App/sikarugir/sikarugir
+
+## 2. Create a dedicated wrapper
+
+Use either:
+
+- Porting Kit's custom-port flow backed by Sikarugir; or
+- Sikarugir Creator directly.
+
+Keep this wrapper dedicated to Anno experiments. Do not reuse a wrapper containing unrelated games.
+
+Suggested name:
+
+    ~/Applications/Sikarugir/Anno1800.app
+
+At this point, before installing a launcher:
+
+    bash scripts/capture-baseline.sh \
+      --wrapper "$HOME/Applications/Sikarugir/Anno1800.app" \
+      --label pre-launcher
+
+If Porting Kit chooses a different path, pass that actual `.app` path.
+
+## 3. Select D3DMetal
+
+In the GUI, select D3DMetal and make sure competing renderer toggles are not simultaneously enabled.
+
+Or, for a Sikarugir wrapper with the standard plist layout:
+
+    bash scripts/enable-d3dmetal.sh "$HOME/Applications/Sikarugir/Anno1800.app"
+
+The script creates a timestamped `Info.plist` backup before modifying renderer keys.
+
+Then capture:
+
+    bash scripts/capture-baseline.sh \
+      --wrapper "$HOME/Applications/Sikarugir/Anno1800.app" \
+      --label d3dmetal-base
+
+## 4. Install the launcher route you actually own
+
+Do not install both routes into the same first baseline.
+
+### Ubisoft-owned copy
+
+Install Ubisoft Connect in this wrapper and sign in normally.
+
+### Steam-owned copy
+
+Install Windows Steam in this wrapper, sign in, then allow the owned Anno installation to install/use Ubisoft Connect as required.
+
+A recent independent Sikarugir project demonstrates that a Windows Steam wrapper with D3DMetal can be assembled without CrossOver. We use that as implementation evidence, not as proof that its pinned engine is the right Anno engine.
+
+After the launcher is working:
+
+    bash scripts/capture-baseline.sh \
+      --wrapper "/path/to/Anno1800.app" \
+      --label launcher-working
+
+## 5. Install / discover Anno
+
+Once Anno is installed:
+
+    bash scripts/capture-baseline.sh \
+      --wrapper "/path/to/Anno1800.app" \
+      --label anno-installed
+
+The inspector searches the wrapper for common Steam, Ubisoft Connect, and Anno executables. It records paths and metadata, not file contents.
+
+## 6. First game oracle
+
+Record each result separately:
+
+1. process starts;
+2. game window appears;
+3. main menu renders;
+4. input works;
+5. audio works;
+6. a real save loads;
+7. 30 minutes of normal play remain stable.
+
+For the first renderer test, use D3DMetal. Try Anno's DX12 mode first because that is the most direct fit for D3DMetal, but keep DX11 as an explicit second experiment if DX12 fails or exhibits defects.
+
+Capture immediately after the first main-menu success and after the first stable gameplay session.
+
+## 7. What not to do yet
+
+Do not:
+
+- build Wine from source;
+- import CrossOver bottles;
+- install random winetricks verbs;
+- copy registry files from someone else's prefix;
+- add multiple graphics translation layers;
+- apply game-specific Wine patches without a demonstrated failure they address.
+
+If Step A works, the next task is clean reproduction, not deeper reverse engineering.
+
+If Step A fails, preserve the failing capture and exact symptom. That becomes the starting evidence for a narrow comparison.
