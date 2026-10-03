@@ -17,6 +17,7 @@ D3DMetal is an Apple closed-source component with its own restrictive license. U
 ## Start here
 
 - [PLAN.md](PLAN.md) — project goal, phases, success criteria, and stopping rules.
+- [AGENTS.md](AGENTS.md) — repository contract for coding agents and future investigations.
 - [docs/step-a-free-stack.md](docs/step-a-free-stack.md) — first hands-on experiment.
 - [docs/experiment-protocol.md](docs/experiment-protocol.md) — how to make runs comparable.
 - [docs/reference-stack.md](docs/reference-stack.md) — external projects we intentionally reuse.
