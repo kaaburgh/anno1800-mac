@@ -146,7 +146,18 @@ echo "Template SHA256:   $template_sha256"
 parent="$(dirname "$wrapper")"
 mkdir -p "$parent"
 tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/anno1800-sikarugir.XXXXXX")"
-cleanup() { rm -rf "$tmpdir"; }
+wrapper_created=0
+cleanup() {
+  status=$?
+  rm -rf "$tmpdir"
+  if (( status != 0 && wrapper_created )) && [[ -e "$wrapper" ]]; then
+    echo >&2
+    echo "Bootstrap failed after creating a partial wrapper:" >&2
+    echo "  $wrapper" >&2
+    echo "The partial wrapper was kept for inspection. Remove it before retrying:" >&2
+    printf '  rm -rf %q\n' "$wrapper" >&2
+  fi
+}
 trap cleanup EXIT
 
 mkdir -p "$tmpdir/template"
@@ -161,6 +172,7 @@ if (( ${#template_apps[@]} != 1 )); then
   exit 1
 fi
 cp -R "${template_apps[0]}" "$wrapper"
+wrapper_created=1
 
 shared="$wrapper/Contents/SharedSupport"
 mkdir -p "$shared"
