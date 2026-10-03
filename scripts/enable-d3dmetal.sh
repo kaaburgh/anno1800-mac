@@ -33,9 +33,10 @@ set_int() {
 
 set_int "D3DMETAL" 1
 
-# These renderer toggles are mutually exclusive in a useful baseline.
-# Only touch them when the wrapper already defines the key, because templates
-# may change names and we do not want to invent configuration.
+# For Anno's D3D11/D3D12 baseline, disable alternate D3D10/D3D11 renderer
+# toggles. Leave D9VK/CNC_DDRAW at the upstream template defaults until a
+# launcher or game symptom gives us a reason to change those older-API paths.
+# Only touch keys the wrapper already defines.
 for key in DXMT DXVK; do
   if has_key "$key"; then
     plutil -replace "$key" -integer 0 "$plist"
@@ -45,7 +46,7 @@ done
 echo "Updated: $plist"
 echo "Backup:  $backup"
 echo
-for key in D3DMETAL DXMT DXVK MOLTENVKCX WINEESYNC WINEMSYNC; do
+for key in D3DMETAL DXMT DXVK D9VK CNC_DDRAW MOLTENVKCX WINEESYNC WINEMSYNC; do
   if has_key "$key"; then
     value="$(plutil -extract "$key" raw -o - "$plist" 2>/dev/null || true)"
     printf '%-12s %s\n' "$key" "$value"
