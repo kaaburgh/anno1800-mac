@@ -1,7 +1,11 @@
-.PHONY: doctor inspect capture compare
+.PHONY: doctor bootstrap inspect capture compare
 
 doctor:
 	bash scripts/doctor.sh
+
+bootstrap:
+	@test -n "$(WRAPPER)" || (echo "Set WRAPPER=/path/to/Anno1800.app" >&2; exit 2)
+	bash scripts/bootstrap-sikarugir-wrapper.sh --wrapper "$(WRAPPER)" $(if $(ENGINE),--engine "$(ENGINE)",) $(if $(TEMPLATE),--template "$(TEMPLATE)",)
 
 inspect:
 	@test -n "$(WRAPPER)" || (echo "Set WRAPPER=/path/to/Anno1800.app" >&2; exit 2)
