@@ -27,6 +27,27 @@ If Sikarugir is not installed, use the current upstream Homebrew instructions ra
 
 ## 2. Create a dedicated wrapper
 
+The shortest reproducible path is the repository bootstrap:
+
+    bash scripts/bootstrap-sikarugir-wrapper.sh \
+      --wrapper "$HOME/Applications/Sikarugir/Anno1800.app"
+
+By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates the prefix, enables D3DMetal, and writes a baseline capture.
+
+It always prints the exact engine/template selected. For a pinned rerun use, for example:
+
+    bash scripts/bootstrap-sikarugir-wrapper.sh \
+      --wrapper "$HOME/Applications/Sikarugir/Anno1800-pinned.app" \
+      --engine WS12WineSikarugir11.0_1 \
+      --template Template-1.0.21
+
+Those example versions are the current upstream entries as of 2026-10-03; they are examples, **not** an Anno-specific recommendation. A future clean reproduction should pin whatever combination is actually proven to work.
+
+The script refuses to overwrite an existing wrapper. It also uses only portable macOS/Bash 3.2-compatible shell constructs; no GNU `find`/Homebrew coreutils are assumed.
+
+### GUI alternative
+
+
 Use either:
 
 - Porting Kit's custom-port flow backed by Sikarugir; or
