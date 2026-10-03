@@ -49,6 +49,14 @@ This project is useful evidence for current Sikarugir wrapper internals and CLI 
 
 We deliberately do **not** copy its pinned Wine engine choice into the Anno plan. A working engine for one Steam game is not evidence that the same engine is optimal for Anno 1800.
 
+## Per-game wrapper prior art
+
+https://github.com/therealjkvalentine/mac-gaming-ports
+
+This is a current example of the same architectural choice: keep Sikarugir/Wine/D3DMetal generic and put game-specific knowledge in a thin recipe layer. It has no Anno 1800 recipe today, but its verified games provide useful implementation patterns for self-contained wrappers and renderer selection.
+
+We reuse only generally applicable wrapper/build lessons. This project keeps Ubisoft/Steam authentication and DRM intact and does not adopt unrelated DRM-bypass/offline tooling.
+
 ## Wine source / later phases
 
 If Step A requires deeper work, candidates include:
