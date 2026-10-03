@@ -9,6 +9,7 @@ plist="$wrapper/Contents/Info.plist"
 wine_dir="$wrapper/Contents/SharedSupport/wine"
 prefix="$wrapper/Contents/SharedSupport/prefix"
 drive_c="$prefix/drive_c"
+renderer_dir="$wrapper/Contents/Frameworks/renderer"
 
 echo "[wrapper]"
 printf 'path=%s\n' "$wrapper"
@@ -17,13 +18,34 @@ printf 'name=%s\n' "$(basename "$wrapper")"
 if [[ -f "$plist" ]]; then
   echo
   echo "[plist]"
-  for key in "D3DMETAL" "DXMT" "DXVK" "MOLTENVKCX" "WINEESYNC" "WINEMSYNC" "Program Name and Path" "Program Flags" "Skip Gecko" "Skip Mono"; do
+  for key in "D3DMETAL" "DXMT" "DXVK" "D9VK" "CNC_DDRAW" "FASTMATH" "METAL_HUD" "Debug Mode" "WINEDEBUG" "MOLTENVKCX" "WINEESYNC" "WINEMSYNC" "Program Name and Path" "Program Flags" "Skip Gecko" "Skip Mono" "CFBundleShortVersionString" "CFBundleVersion"; do
     if value="$(plutil -extract "$key" raw -o - "$plist" 2>/dev/null)"; then
       printf '%s=%s\n' "$key" "$value"
     fi
   done
 else
   echo "plist=missing"
+fi
+
+echo
+echo "[renderer]"
+if [[ -d "$renderer_dir" ]]; then
+  for version_file in "$renderer_dir"/*/version; do
+    [[ -f "$version_file" ]] || continue
+    renderer_name="$(basename "$(dirname "$version_file")")"
+    printf '%s=%s\n' "$renderer_name" "$(cat "$version_file")"
+  done
+
+  d3dmetal_plist="$renderer_dir/d3dmetal/external/D3DMetal.framework/Versions/A/Resources/Info.plist"
+  if [[ -f "$d3dmetal_plist" ]]; then
+    for key in CFBundleShortVersionString CFBundleVersion; do
+      if value="$(plutil -extract "$key" raw -o - "$d3dmetal_plist" 2>/dev/null)"; then
+        printf 'd3dmetal_%s=%s\n' "$key" "$value"
+      fi
+    done
+  fi
+else
+  echo "renderer_dir=missing"
 fi
 
 echo
