@@ -7,7 +7,8 @@ wrapper="$1"
 
 plist="$wrapper/Contents/Info.plist"
 wine_dir="$wrapper/Contents/SharedSupport/wine"
-drive_c="$wrapper/Contents/drive_c"
+prefix="$wrapper/Contents/SharedSupport/prefix"
+drive_c="$prefix/drive_c"
 
 echo "[wrapper]"
 printf 'path=%s\n' "$wrapper"
@@ -46,7 +47,7 @@ else
   echo "drive_c=missing"
 fi
 for reg in user.reg system.reg userdef.reg; do
-  path="$wrapper/Contents/$reg"
+  path="$prefix/$reg"
   if [[ -f "$path" ]]; then
     printf '%s_sha256=' "$reg"
     shasum -a 256 "$path" | awk '{print $1}'
