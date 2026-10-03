@@ -34,6 +34,7 @@ done
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_dir="$(cd "$script_dir/.." && pwd)"
+prefix="$wrapper/Contents/SharedSupport/prefix"
 safe_label="$(printf '%s' "$label" | tr -cs 'A-Za-z0-9._-' '-')"
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 out="$repo_dir/artifacts/${timestamp}-${safe_label}"
@@ -88,8 +89,9 @@ bash "$script_dir/inspect-wrapper.sh" "$wrapper" > "$out/wrapper.txt"
 {
   plist="$wrapper/Contents/Info.plist"
   [[ -f "$plist" ]] && shasum -a 256 "$plist"
-  for reg in "$wrapper/Contents/user.reg" "$wrapper/Contents/system.reg" "$wrapper/Contents/userdef.reg"; do
-    [[ -f "$reg" ]] && shasum -a 256 "$reg"
+  for reg in user.reg system.reg userdef.reg; do
+    path="$prefix/$reg"
+    [[ -f "$path" ]] && shasum -a 256 "$path"
   done
   version="$wrapper/Contents/SharedSupport/wine/version"
   [[ -f "$version" ]] && shasum -a 256 "$version"
