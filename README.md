@@ -22,7 +22,7 @@ D3DMetal is an Apple closed-source component with its own restrictive license. U
 - [docs/experiment-protocol.md](docs/experiment-protocol.md) — how to make runs comparable.
 - [docs/reference-stack.md](docs/reference-stack.md) — external projects we intentionally reuse.
 - [scripts/doctor.sh](scripts/doctor.sh) — non-destructive host preflight.
-- [scripts/bootstrap-sikarugir-wrapper.sh](scripts/bootstrap-sikarugir-wrapper.sh) — assemble a clean wrapper from the current official Sikarugir engine/template catalog, initialize its prefix, enable D3DMetal, and capture A0.
+- [scripts/bootstrap-sikarugir-wrapper.sh](scripts/bootstrap-sikarugir-wrapper.sh) — assemble a clean wrapper from official Sikarugir release assets (defaulting to the current engine/template catalogs), initialize its prefix, enable D3DMetal, and capture A0.
 - [scripts/capture-baseline.sh](scripts/capture-baseline.sh) — capture a wrapper/runtime snapshot.
 - [scripts/enable-d3dmetal.sh](scripts/enable-d3dmetal.sh) — make D3DMetal the selected Sikarugir renderer.
 - [scripts/compare-captures.py](scripts/compare-captures.py) — compare two captures.
