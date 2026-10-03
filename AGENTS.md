@@ -4,7 +4,7 @@
 
 Make Anno 1800 playable on Apple Silicon without a paid CrossOver dependency.
 
-Read `PLAN.md` before making changes. The first target is an M3 Max Mac. The initial preferred stack is a direct Sikarugir wrapper + Wine + D3DMetal.
+Read `PLAN.md` before making changes. The first target is an M3 Max Mac. The owned Anno 1800 copy is the Steam edition. The initial preferred stack is a direct Sikarugir wrapper + Wine + D3DMetal, with Windows Steam as the first launcher route and Ubisoft Connect only as required by the Steam-launched game.
 
 ## Decision order
 
@@ -48,6 +48,7 @@ In particular, do not reintroduce without evidence:
 
 - generic wrapper CLI commands or bootstrap escape hatches such as skipping prefix creation, D3DMetal selection, or captures;
 - Porting Kit / Sikarugir Creator / Homebrew as parallel Step A execution paths;
+- a parallel direct-Ubisoft launcher route while the owned Steam route has not demonstrated a failure requiring it;
 - D3D9, DirectDraw, or unrelated renderer settings such as D9VK/CNC_DDRAW into the Anno renderer strategy;
 - generic renderer inventories beyond the D3DMetal / DXMT / DXVK paths relevant to Anno's DX11/DX12 modes;
 - validation of an explicitly pinned Wine engine against the current upstream engine list;
