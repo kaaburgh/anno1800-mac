@@ -77,7 +77,7 @@ Target stock macOS userland first.
 - Scripts must work with Apple's Bash 3.2 unless they explicitly declare and verify another shell.
 - Do not assume GNU behavior for `find`, `sed`, `awk`, `xargs`, or similar tools.
 - Quote paths; assume spaces and Unicode.
-- Never overwrite an existing wrapper or prefix without an explicit destructive flag and a clear message.
+- Never overwrite an existing wrapper or prefix; require a new path or explicit manual cleanup.
 - Prefer exact upstream release metadata over copied version strings from forum posts.
 
 Before publishing script changes, run `make check`. It performs shell syntax checks and Python compile checks without adding project-specific CI infrastructure.
