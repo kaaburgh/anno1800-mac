@@ -7,17 +7,16 @@ Usage:
   bootstrap-sikarugir-wrapper.sh --wrapper /path/to/Anno1800.app [options]
 
 Options:
-  --engine NAME       Sikarugir engine from the official EngineList.txt.
+  --engine NAME       Sikarugir engine release asset name.
                       Default: first (current) entry from upstream.
   --template NAME     Sikarugir template version.
                       Default: upstream NewestVersion.txt.
-  --no-prefix         Assemble wrapper but do not initialize the Wine prefix.
-  --no-d3dmetal       Do not select D3DMetal after assembly.
-  --no-capture        Do not create an anno1800-mac baseline capture.
   -h, --help          Show this help.
 
 The target wrapper must not already exist. The script downloads only from the
 Sikarugir-App GitHub organization and reuses Sikarugir's normal cache directory.
+An explicit --engine/--template is treated as a pin and is not required to
+remain listed by the current upstream catalog.
 USAGE
   exit "${1:-2}"
 }
@@ -25,9 +24,6 @@ USAGE
 wrapper=""
 engine=""
 template=""
-create_prefix=1
-enable_d3dmetal=1
-capture=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -40,12 +36,6 @@ while [[ $# -gt 0 ]]; do
     --template)
       [[ $# -ge 2 ]] || usage
       template="$2"; shift 2 ;;
-    --no-prefix)
-      create_prefix=0; shift ;;
-    --no-d3dmetal)
-      enable_d3dmetal=0; shift ;;
-    --no-capture)
-      capture=0; shift ;;
     -h|--help)
       usage 0 ;;
     *)
@@ -85,17 +75,10 @@ TEMPLATE_VERSION_URL="https://raw.githubusercontent.com/Sikarugir-App/Template/m
 ENGINE_RELEASE_BASE="https://github.com/Sikarugir-App/Engines/releases/download/v1.0"
 TEMPLATE_RELEASE_BASE="https://github.com/Sikarugir-App/Template/releases/download/v1.0"
 
-engine_list="$(curl -fsSL "$ENGINE_LIST_URL")"
-[[ -n "$engine_list" ]] || { echo "Official Sikarugir engine list is empty" >&2; exit 1; }
-
 if [[ -z "$engine" ]]; then
+  engine_list="$(curl -fsSL "$ENGINE_LIST_URL")"
+  [[ -n "$engine_list" ]] || { echo "Official Sikarugir engine list is empty" >&2; exit 1; }
   engine="$(printf '%s\n' "$engine_list" | sed -n '1{/^[[:space:]]*$/!p;}')"
-fi
-if ! printf '%s\n' "$engine_list" | grep -Fqx -- "$engine"; then
-  echo "Engine is not present in current official EngineList.txt: $engine" >&2
-  echo "Available engines:" >&2
-  printf '  %s\n' $engine_list >&2
-  exit 1
 fi
 
 if [[ -z "$template" ]]; then
@@ -203,34 +186,26 @@ launcher="$wrapper/Contents/MacOS/Sikarugir"
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
-if (( create_prefix )); then
-  echo "Creating Wine prefix..."
-  "$launcher" WSS-wineprefixcreate
-  prefix="$wrapper/Contents/SharedSupport/prefix"
-  if [[ ! -d "$prefix/drive_c/windows" || ! -d "$prefix/drive_c/Program Files (x86)" ]]; then
-    echo "Prefix creation did not produce a usable 64-bit (WoW64) prefix:" >&2
-    echo "  $prefix" >&2
-    exit 1
-  fi
+echo "Creating Wine prefix..."
+"$launcher" WSS-wineprefixcreate
+prefix="$wrapper/Contents/SharedSupport/prefix"
+if [[ ! -d "$prefix/drive_c/windows" || ! -d "$prefix/drive_c/Program Files (x86)" ]]; then
+  echo "Prefix creation did not produce a usable 64-bit (WoW64) prefix:" >&2
+  echo "  $prefix" >&2
+  exit 1
 fi
 
-if (( capture )); then
-  bash "$script_dir/capture-baseline.sh" \
-    --wrapper "$wrapper" \
-    --label fresh-sikarugir-upstream-default-renderer \
-    --note "Fresh wrapper at upstream default renderer state (current Sikarugir documentation names DXMT as default); engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
-fi
+bash "$script_dir/capture-baseline.sh" \
+  --wrapper "$wrapper" \
+  --label fresh-sikarugir-upstream-default-renderer \
+  --note "Fresh wrapper at upstream default renderer state (current Sikarugir documentation names DXMT as default); engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
 
-if (( enable_d3dmetal )); then
-  bash "$script_dir/enable-d3dmetal.sh" "$wrapper"
-fi
+bash "$script_dir/enable-d3dmetal.sh" "$wrapper"
 
-if (( capture && enable_d3dmetal )); then
-  bash "$script_dir/capture-baseline.sh" \
-    --wrapper "$wrapper" \
-    --label fresh-sikarugir-d3dmetal \
-    --note "D3DMetal selected after fresh wrapper assembly; engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
-fi
+bash "$script_dir/capture-baseline.sh" \
+  --wrapper "$wrapper" \
+  --label fresh-sikarugir-d3dmetal \
+  --note "D3DMetal selected after fresh wrapper assembly; engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
 
 cat <<EOF
 
