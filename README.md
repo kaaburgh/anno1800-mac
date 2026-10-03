@@ -6,7 +6,7 @@ The first target is an M3 Max MacBook. CrossOver may be used later as a known-go
 
 ## Current strategy
 
-1. Try the shortest free path first: **Porting Kit / Sikarugir + D3DMetal**.
+1. Try the shortest free path first: **direct Sikarugir wrapper + D3DMetal**.
 2. Capture host, wrapper, Wine-prefix, launcher, and renderer metadata before changing layers.
 3. If the free stack works, turn that configuration into a reproducible recipe rather than inventing patches.
 4. If it fails while CrossOver works, reduce the delta systematically and patch only the layer shown to be responsible.
@@ -25,7 +25,6 @@ D3DMetal is an Apple closed-source component with its own restrictive license. U
 - [scripts/bootstrap-sikarugir-wrapper.sh](scripts/bootstrap-sikarugir-wrapper.sh) — assemble a clean wrapper from the current official Sikarugir engine/template catalog, initialize its prefix, enable D3DMetal, and capture A0.
 - [scripts/capture-baseline.sh](scripts/capture-baseline.sh) — capture a wrapper/runtime snapshot.
 - [scripts/enable-d3dmetal.sh](scripts/enable-d3dmetal.sh) — make D3DMetal the selected Sikarugir renderer.
-- [scripts/sikarugir-wrapper.sh](scripts/sikarugir-wrapper.sh) — small CLI around the wrapper launcher.
 - [scripts/compare-captures.py](scripts/compare-captures.py) — compare two captures.
 
 ## Safety / repository hygiene
