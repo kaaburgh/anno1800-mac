@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'USAGE'
+Usage:
+  bootstrap-sikarugir-wrapper.sh --wrapper /path/to/Anno1800.app [options]
+
+Options:
+  --engine NAME       Sikarugir engine release asset name.
+                      Default: first (current) entry from upstream.
+  --template NAME     Sikarugir template version.
+                      Default: upstream NewestVersion.txt.
+  -h, --help          Show this help.
+
+The target wrapper must not already exist. The script downloads only from the
+Sikarugir-App GitHub organization and reuses Sikarugir's normal cache directory.
+An explicit --engine/--template is treated as a pin and is not required to
+remain listed by the current upstream catalog.
+USAGE
+  exit "${1:-2}"
+}
+
+wrapper=""
+engine=""
+template=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --wrapper)
+      [[ $# -ge 2 ]] || usage
+      wrapper="$2"; shift 2 ;;
+    --engine)
+      [[ $# -ge 2 ]] || usage
+      engine="$2"; shift 2 ;;
+    --template)
+      [[ $# -ge 2 ]] || usage
+      template="$2"; shift 2 ;;
+    -h|--help)
+      usage 0 ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage ;;
+  esac
+done
+
+[[ -n "$wrapper" ]] || usage
+[[ "$(uname -s 2>/dev/null)" == "Darwin" ]] || { echo "macOS required" >&2; exit 1; }
+[[ "$(uname -m 2>/dev/null)" == "arm64" ]] || { echo "Apple Silicon required" >&2; exit 1; }
+command -v curl >/dev/null 2>&1 || { echo "curl is required" >&2; exit 1; }
+command -v tar >/dev/null 2>&1 || { echo "tar is required" >&2; exit 1; }
+
+macos="$(sw_vers -productVersion 2>/dev/null || true)"
+IFS=. read -r macos_major macos_minor _rest <<< "$macos"
+macos_major="${macos_major:-0}"
+macos_minor="${macos_minor:-0}"
+if (( macos_major < 14 || (macos_major == 14 && macos_minor < 6) )); then
+  echo "Current Sikarugir requires macOS 14.6 or later (got $macos)" >&2
+  exit 1
+fi
+
+if ! /usr/bin/arch -x86_64 /usr/bin/true >/dev/null 2>&1; then
+  echo "Rosetta 2 is required. Install it with:" >&2
+  echo "  /usr/sbin/softwareupdate --install-rosetta --agree-to-license" >&2
+  exit 1
+fi
+
+if [[ -e "$wrapper" ]]; then
+  echo "Refusing to overwrite existing path: $wrapper" >&2
+  exit 1
+fi
+
+ENGINE_LIST_URL="https://raw.githubusercontent.com/Sikarugir-App/Engines/main/EngineList.txt"
+TEMPLATE_VERSION_URL="https://raw.githubusercontent.com/Sikarugir-App/Template/main/NewestVersion.txt"
+ENGINE_RELEASE_BASE="https://github.com/Sikarugir-App/Engines/releases/download/v1.0"
+TEMPLATE_RELEASE_BASE="https://github.com/Sikarugir-App/Template/releases/download/v1.0"
+
+if [[ -z "$engine" ]]; then
+  engine_list="$(curl -fsSL "$ENGINE_LIST_URL")"
+  [[ -n "$engine_list" ]] || { echo "Official Sikarugir engine list is empty" >&2; exit 1; }
+  engine="$(printf '%s\n' "$engine_list" | sed -n '1{/^[[:space:]]*$/!p;}')"
+fi
+
+if [[ -z "$template" ]]; then
+  template="$(curl -fsSL "$TEMPLATE_VERSION_URL" | tr -d '\r\n')"
+fi
+[[ "$template" == Template-* ]] || { echo "Unexpected template name: $template" >&2; exit 1; }
+
+cache="$HOME/Library/Application Support/Sikarugir"
+engine_archive="$cache/Engines/${engine}.tar.xz"
+template_archive="$cache/Template/${template}.tar.xz"
+engine_url="$ENGINE_RELEASE_BASE/${engine}.tar.xz"
+template_url="$TEMPLATE_RELEASE_BASE/${template}.tar.xz"
+
+fetch() {
+  local url="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [[ -s "$dest" ]]; then
+    echo "Using cached: $dest"
+    return
+  fi
+
+  local tmp="${dest}.part.$$"
+  echo "Downloading: $url"
+  if ! curl -fL --retry 3 --retry-delay 2 --progress-bar -o "$tmp" "$url"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  if [[ ! -s "$tmp" ]]; then
+    rm -f "$tmp"
+    echo "Downloaded file is empty: $url" >&2
+    return 1
+  fi
+  mv "$tmp" "$dest"
+}
+
+echo "Selected engine:   $engine"
+echo "Selected template: $template"
+echo "Target wrapper:    $wrapper"
+
+fetch "$engine_url" "$engine_archive"
+fetch "$template_url" "$template_archive"
+
+engine_sha256="$(shasum -a 256 "$engine_archive" | awk '{print $1}')"
+template_sha256="$(shasum -a 256 "$template_archive" | awk '{print $1}')"
+echo "Engine SHA256:     $engine_sha256"
+echo "Template SHA256:   $template_sha256"
+
+parent="$(dirname "$wrapper")"
+mkdir -p "$parent"
+tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/anno1800-sikarugir.XXXXXX")"
+wrapper_created=0
+cleanup() {
+  status=$?
+  rm -rf "$tmpdir"
+  if (( status != 0 && wrapper_created )) && [[ -e "$wrapper" ]]; then
+    echo >&2
+    echo "Bootstrap failed after creating a partial wrapper:" >&2
+    echo "  $wrapper" >&2
+    echo "The partial wrapper was kept for inspection. Remove it before retrying:" >&2
+    printf '  rm -rf %q\n' "$wrapper" >&2
+  fi
+}
+trap cleanup EXIT
+
+mkdir -p "$tmpdir/template" "$tmpdir/engine"
+if ! tar -xf "$template_archive" -C "$tmpdir/template"; then
+  echo "Could not extract cached template archive: $template_archive" >&2
+  echo "Delete that archive and rerun the bootstrap." >&2
+  exit 1
+fi
+if ! tar -xf "$engine_archive" -C "$tmpdir/engine"; then
+  echo "Could not extract cached engine archive: $engine_archive" >&2
+  echo "Delete that archive and rerun the bootstrap." >&2
+  exit 1
+fi
+
+template_apps=()
+while IFS= read -r item; do
+  template_apps[${#template_apps[@]}]="$item"
+done < <(find "$tmpdir/template" -type d -name '*.app' -prune -print)
+if (( ${#template_apps[@]} != 1 )); then
+  echo "Expected exactly one .app in template archive; found ${#template_apps[@]}" >&2
+  printf '  %s\n' "${template_apps[@]:-}" >&2
+  exit 1
+fi
+
+bundles=()
+while IFS= read -r item; do
+  bundles[${#bundles[@]}]="$item"
+done < <(find "$tmpdir/engine" -type d -name 'wswine.bundle' -prune -print)
+if (( ${#bundles[@]} != 1 )); then
+  echo "Expected exactly one wswine.bundle in engine archive; found ${#bundles[@]}" >&2
+  printf '  %s\n' "${bundles[@]:-}" >&2
+  exit 1
+fi
+
+wrapper_created=1
+cp -R "${template_apps[0]}" "$wrapper"
+shared="$wrapper/Contents/SharedSupport"
+mkdir -p "$shared"
+cp -R "${bundles[0]}" "$shared/wine"
+
+launcher="$wrapper/Contents/MacOS/Sikarugir"
+[[ -x "$launcher" ]] || { echo "Assembled wrapper has no executable Sikarugir launcher" >&2; exit 1; }
+
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+
+echo "Creating Wine prefix..."
+"$launcher" WSS-wineprefixcreate
+prefix="$wrapper/Contents/SharedSupport/prefix"
+if [[ ! -d "$prefix/drive_c/windows" || ! -d "$prefix/drive_c/Program Files (x86)" ]]; then
+  echo "Prefix creation did not produce a usable 64-bit (WoW64) prefix:" >&2
+  echo "  $prefix" >&2
+  exit 1
+fi
+
+bash "$script_dir/capture-baseline.sh" \
+  --wrapper "$wrapper" \
+  --label fresh-sikarugir-upstream-default-renderer \
+  --note "Fresh wrapper at upstream default renderer state (current Sikarugir documentation names DXMT as default); engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
+
+bash "$script_dir/enable-d3dmetal.sh" "$wrapper"
+
+bash "$script_dir/capture-baseline.sh" \
+  --wrapper "$wrapper" \
+  --label fresh-sikarugir-d3dmetal \
+  --note "D3DMetal selected after fresh wrapper assembly; engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
+
+cat <<EOF
+
+Wrapper ready:
+  $wrapper
+
+Engine:
+  $engine
+  sha256=$engine_sha256
+Template:
+  $template
+  sha256=$template_sha256
+
+Inspect:
+  bash "$script_dir/inspect-wrapper.sh" "$wrapper"
+Open:
+  open "$wrapper"
+EOF
