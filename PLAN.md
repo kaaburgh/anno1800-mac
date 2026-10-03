@@ -84,15 +84,13 @@ Do not start here. A custom Wine build is a diagnostic/tooling milestone, not th
 ## Experiment order
 
 1. Run `scripts/doctor.sh`.
-2. Create one dedicated Anno wrapper with the repository bootstrap.
-4. Capture `pre-launcher`.
-5. Select D3DMetal; capture `d3dmetal-base`.
-6. Install the relevant Windows launcher; capture `launcher-installed`.
-7. Install/discover Anno; capture `anno-installed`.
-8. Try DX12 first when using D3DMetal, but keep DX11 as an explicit comparison rather than an assumption.
-9. Capture `main-menu` and first stable `gameplay` state.
-10. If successful, repeat from a clean wrapper before debugging anything deeper.
-11. Only if free path fails, create a CrossOver reference run.
+2. Run the repository bootstrap to create one dedicated Anno wrapper, verify its prefix, and capture the upstream-default and D3DMetal A0 states.
+3. Install the relevant Windows launcher; capture `launcher-installed`.
+4. Install/discover Anno; capture `anno-installed`.
+5. Try DX12 first when using D3DMetal, but keep DX11 as an explicit comparison rather than an assumption.
+6. Capture `main-menu` and first stable `gameplay` state.
+7. If successful, repeat from a clean wrapper before debugging anything deeper.
+8. Only if the free path fails, create a CrossOver reference run.
 
 ## Experimental discipline
 
