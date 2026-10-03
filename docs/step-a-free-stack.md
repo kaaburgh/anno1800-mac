@@ -32,7 +32,7 @@ The shortest reproducible path is the repository bootstrap:
     bash scripts/bootstrap-sikarugir-wrapper.sh \
       --wrapper "$HOME/Applications/Sikarugir/Anno1800.app"
 
-By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates the prefix, enables D3DMetal, and writes a baseline capture.
+By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates the prefix, captures the pre-renderer state, enables D3DMetal, and captures the D3DMetal state. It records SHA-256 hashes of the exact engine and template archives in those captures.
 
 It always prints the exact engine/template selected. For a pinned rerun use, for example:
 
@@ -46,7 +46,6 @@ Those example versions are the current upstream entries as of 2026-10-03; they a
 The script refuses to overwrite an existing wrapper. It also uses only portable macOS/Bash 3.2-compatible shell constructs; no GNU `find`/Homebrew coreutils are assumed.
 
 ### GUI alternative
-
 
 Use either:
 
