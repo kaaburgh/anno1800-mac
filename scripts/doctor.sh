@@ -59,8 +59,7 @@ else
   warning "Sikarugir Creator not detected"
   info "Current upstream install:"
   info "  brew trust Sikarugir-App/sikarugir"
-  info "  brew install --cask Sikarugir-App/sikarugir/sikarugir
-
+  info "  brew install --cask Sikarugir-App/sikarugir/sikarugir"
 fi
 
 portingkit=""
