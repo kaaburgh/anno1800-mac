@@ -32,7 +32,7 @@ The shortest reproducible path is the repository bootstrap:
     bash scripts/bootstrap-sikarugir-wrapper.sh \
       --wrapper "$HOME/Applications/Sikarugir/Anno1800.app"
 
-By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates the prefix, captures the pre-renderer state, enables D3DMetal, and captures the D3DMetal state. It records SHA-256 hashes of the exact engine and template archives in those captures.
+By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates and verifies the 64-bit prefix, captures the upstream-default renderer state, enables D3DMetal, and captures the D3DMetal state. Current Sikarugir documentation names DXMT as the default renderer; the capture records the actual renderer keys and bundled renderer versions rather than assuming that default will never change. It records SHA-256 hashes of the exact engine and template archives in those captures.
 
 It always prints the exact engine/template selected. For a pinned rerun use, for example:
 
@@ -68,7 +68,7 @@ If Porting Kit chooses a different path, pass that actual `.app` path.
 
 ## 3. Select D3DMetal
 
-In the GUI, select D3DMetal and make sure competing renderer toggles are not simultaneously enabled.
+In the GUI, select D3DMetal and avoid simultaneously enabling an alternate D3D10/D3D11 renderer. The repository script disables DXMT/DXVK when those keys exist, but deliberately leaves the template's D9VK/CNC_DDRAW defaults unchanged until an observed launcher/game symptom justifies changing older-API paths.
 
 Or, for a Sikarugir wrapper with the standard plist layout:
 
