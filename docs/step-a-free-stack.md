@@ -1,6 +1,6 @@
 # Step A — free stack baseline
 
-This is the first hands-on experiment. It deliberately avoids building Wine from source.
+This is the first hands-on experiment. It deliberately avoids building Wine from source and keeps one execution path.
 
 ## 1. Preflight
 
@@ -8,79 +8,62 @@ From a clone of this repository:
 
     bash scripts/doctor.sh
 
-The script does not install anything. It checks:
+The script does not install anything. It checks only requirements used by the direct bootstrap:
 
 - Apple Silicon;
 - macOS version;
 - Rosetta execution;
-- Homebrew (optional for the direct bootstrap; useful for the Creator GUI path);
-- Sikarugir / Porting Kit presence;
+- required stock tools;
 - free disk space.
 
 Current Sikarugir upstream documents macOS 14.6+ and Rosetta 2 for Apple Silicon.
 
-The direct bootstrap in the next section does **not** require Homebrew or Sikarugir Creator. If you prefer the Creator GUI, use the current upstream Homebrew instructions rather than copying an old command from a forum:
-
-    brew upgrade
-    brew trust Sikarugir-App/sikarugir
-    brew install --cask Sikarugir-App/sikarugir/sikarugir
-
 ## 2. Create a dedicated wrapper
 
-The shortest reproducible path is the repository bootstrap:
+Run the repository bootstrap:
 
     bash scripts/bootstrap-sikarugir-wrapper.sh \
       --wrapper "$HOME/Applications/Sikarugir/Anno1800.app"
 
-By default it reads the **current official** Sikarugir `EngineList.txt` and `NewestVersion.txt` at execution time, downloads the selected release assets into Sikarugir's normal cache, assembles a fresh wrapper, creates and verifies the 64-bit prefix, captures the upstream-default renderer state, enables D3DMetal, and captures the D3DMetal state. Current Sikarugir documentation names DXMT as the default renderer; the capture records the actual renderer keys and bundled renderer versions rather than assuming that default will never change. It records SHA-256 hashes of the exact engine and template archives in those captures.
+The bootstrap is intentionally one fixed evidence-producing path:
 
-It always prints the exact engine/template selected. For a pinned rerun use, for example:
+1. select the current upstream engine/template unless explicitly pinned;
+2. download and validate their archives;
+3. assemble a fresh wrapper;
+4. create and verify the 64-bit Wine prefix;
+5. capture the upstream-default renderer state;
+6. select D3DMetal;
+7. capture the D3DMetal state.
+
+Current Sikarugir documentation names DXMT as the default renderer before D3DMetal is selected. The capture records the actual D3DMetal/DXMT/DXVK state and bundled versions rather than treating that default as permanent.
+
+The bootstrap prints and records SHA-256 hashes of the exact engine/template archives.
+
+For a pinned rerun:
 
     bash scripts/bootstrap-sikarugir-wrapper.sh \
       --wrapper "$HOME/Applications/Sikarugir/Anno1800-pinned.app" \
       --engine WS12WineSikarugir11.0_1 \
       --template Template-1.0.21
 
-Those example versions are the current upstream entries as of 2026-10-03; they are examples, **not** an Anno-specific recommendation. A future clean reproduction should pin whatever combination is actually proven to work.
+An explicitly supplied engine/template is a reproduction pin. The engine does not have to remain present in the current upstream `EngineList.txt`; its release asset only has to remain available.
 
-The script refuses to overwrite an existing wrapper. It also uses only portable macOS/Bash 3.2-compatible shell constructs; no GNU `find`/Homebrew coreutils are assumed.
+The example versions above were current on 2026-10-03. They are examples, not an Anno-specific recommendation. A future clean reproduction should pin whichever combination is actually proven to work.
 
-### GUI alternative
+The script refuses to overwrite an existing wrapper. It targets stock macOS/Bash 3.2 and does not depend on Homebrew, Sikarugir Creator, or Porting Kit.
 
-Use either:
+## 3. Renderer baseline
 
-- Porting Kit's custom-port flow backed by Sikarugir; or
-- Sikarugir Creator directly.
+The normal bootstrap already selects D3DMetal and captures state immediately before and after that change.
 
-Keep this wrapper dedicated to Anno experiments. Do not reuse a wrapper containing unrelated games.
+`scripts/enable-d3dmetal.sh` exists as the narrow implementation helper for that transition. It expects the current Sikarugir `D3DMETAL` key to exist; if the key disappears, the script fails instead of inventing an obsolete setting.
 
-Suggested name:
+For Anno, the renderer hypothesis is deliberately limited to:
 
-    ~/Applications/Sikarugir/Anno1800.app
+- DX12 or DX11 through D3DMetal first;
+- DX11 through DXMT only as a fallback if evidence requires it.
 
-At this point, before installing a launcher:
-
-    bash scripts/capture-baseline.sh \
-      --wrapper "$HOME/Applications/Sikarugir/Anno1800.app" \
-      --label pre-launcher
-
-If Porting Kit chooses a different path, pass that actual `.app` path.
-
-## 3. Select D3DMetal
-
-In the GUI, select D3DMetal and avoid simultaneously enabling an alternate D3D10/D3D11 renderer. The repository script disables DXMT/DXVK when those keys exist.
-
-Or, for a Sikarugir wrapper with the standard plist layout:
-
-    bash scripts/enable-d3dmetal.sh "$HOME/Applications/Sikarugir/Anno1800.app"
-
-The script creates a timestamped `Info.plist` backup before modifying renderer keys.
-
-Then capture:
-
-    bash scripts/capture-baseline.sh \
-      --wrapper "$HOME/Applications/Sikarugir/Anno1800.app" \
-      --label d3dmetal-base
+Do not add unrelated renderer backends to the experiment merely because they exist in the generic Sikarugir template.
 
 ## 4. Install the launcher route you actually own
 
@@ -124,7 +107,7 @@ Record each result separately:
 6. a real save loads;
 7. 30 minutes of normal play remain stable.
 
-For the first renderer test, use D3DMetal. Try Anno's DX12 mode first because that is the most direct fit for D3DMetal, but keep DX11 as an explicit second experiment if DX12 fails or exhibits defects.
+Try Anno's DX12 mode first with D3DMetal. Keep DX11 as an explicit second experiment if DX12 fails or exhibits defects.
 
 Capture immediately after the first main-menu success and after the first stable gameplay session.
 
@@ -137,6 +120,7 @@ Do not:
 - install random winetricks verbs;
 - copy registry files from someone else's prefix;
 - add multiple graphics translation layers;
+- add generic wrapper controls or alternate setup paths without a demonstrated need;
 - apply game-specific Wine patches without a demonstrated failure they address.
 
 If Step A works, the next task is clean reproduction, not deeper reverse engineering.
