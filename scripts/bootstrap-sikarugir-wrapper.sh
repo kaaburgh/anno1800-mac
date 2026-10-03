@@ -178,15 +178,22 @@ if (( create_prefix )); then
   "$launcher" WSS-wineprefixcreate
 fi
 
+if (( capture )); then
+  bash "$script_dir/capture-baseline.sh" \
+    --wrapper "$wrapper" \
+    --label fresh-sikarugir-pre-renderer \
+    --note "Fresh wrapper assembled from official Sikarugir engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
+fi
+
 if (( enable_d3dmetal )); then
   bash "$script_dir/enable-d3dmetal.sh" "$wrapper"
 fi
 
-if (( capture )); then
+if (( capture && enable_d3dmetal )); then
   bash "$script_dir/capture-baseline.sh" \
     --wrapper "$wrapper" \
     --label fresh-sikarugir-d3dmetal \
-    --note "Fresh wrapper assembled from official Sikarugir engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
+    --note "D3DMetal selected after fresh wrapper assembly; engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
 fi
 
 cat <<EOF
