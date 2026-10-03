@@ -60,6 +60,7 @@ case "$action" in
     [[ $# -eq 3 ]] || usage
     installer="$3"
     [[ -f "$installer" ]] || { echo "Installer not found: $installer" >&2; exit 1; }
+    installer="$(cd "$(dirname "$installer")" && pwd)/$(basename "$installer")"
     exec "$launcher" WSS-installer "$installer"
     ;;
   *)
