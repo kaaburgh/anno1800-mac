@@ -129,6 +129,11 @@ echo "Target wrapper:    $wrapper"
 fetch "$engine_url" "$engine_archive"
 fetch "$template_url" "$template_archive"
 
+engine_sha256="$(shasum -a 256 "$engine_archive" | awk '{print $1}')"
+template_sha256="$(shasum -a 256 "$template_archive" | awk '{print $1}')"
+echo "Engine SHA256:     $engine_sha256"
+echo "Template SHA256:   $template_sha256"
+
 parent="$(dirname "$wrapper")"
 mkdir -p "$parent"
 tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/anno1800-sikarugir.XXXXXX")"
@@ -181,7 +186,7 @@ if (( capture )); then
   bash "$script_dir/capture-baseline.sh" \
     --wrapper "$wrapper" \
     --label fresh-sikarugir-d3dmetal \
-    --note "Fresh wrapper assembled from official Sikarugir engine=$engine template=$template"
+    --note "Fresh wrapper assembled from official Sikarugir engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
 fi
 
 cat <<EOF
@@ -191,8 +196,10 @@ Wrapper ready:
 
 Engine:
   $engine
+  sha256=$engine_sha256
 Template:
   $template
+  sha256=$template_sha256
 
 Inspect:
   bash "$script_dir/inspect-wrapper.sh" "$wrapper"
