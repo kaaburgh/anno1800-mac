@@ -1,7 +1,7 @@
 .PHONY: check doctor bootstrap inspect capture compare
 
 check:
-	@set -e; for f in scripts/*.sh; do bash -n "$f"; done
+	@set -e; for f in scripts/*.sh; do bash -n "$$f"; done
 	python3 -m py_compile scripts/*.py
 
 doctor:
