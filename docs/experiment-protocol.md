@@ -36,7 +36,6 @@ If several changes are unavoidable, state them in `--note`.
 By default:
 
 - macOS / kernel / architecture / model / memory;
-- Homebrew and wrapper-tool versions where discoverable;
 - Sikarugir wrapper engine identity;
 - selected renderer-related plist keys;
 - canonical Sikarugir prefix (`Contents/SharedSupport/prefix`) existence and registry hashes;
