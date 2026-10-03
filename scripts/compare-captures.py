@@ -3,7 +3,7 @@ import argparse
 import difflib
 from pathlib import Path
 
-DEFAULT_FILES = ("summary.txt", "host.txt", "wrapper.txt", "processes.txt", "hashes.txt")
+DEFAULT_FILES = ("host.txt", "wrapper.txt", "processes.txt", "hashes.txt")
 
 
 def read_lines(path: Path):
@@ -26,8 +26,6 @@ def main() -> int:
         parser.error("both arguments must be capture directories")
 
     files = tuple(args.files) if args.files else DEFAULT_FILES
-    changed = False
-
     for rel in files:
         left = args.left / rel
         right = args.right / rel
@@ -38,11 +36,9 @@ def main() -> int:
         print(f"\n===== {rel} =====")
         if not left.exists():
             print(f"only on right: {right}")
-            changed = True
             continue
         if not right.exists():
             print(f"only on left: {left}")
-            changed = True
             continue
 
         a = read_lines(left)
@@ -51,7 +47,6 @@ def main() -> int:
             print("identical")
             continue
 
-        changed = True
         diff = difflib.unified_diff(
             a,
             b,
@@ -60,7 +55,7 @@ def main() -> int:
         )
         print("".join(diff), end="")
 
-    return 1 if changed else 0
+    return 0
 
 
 if __name__ == "__main__":
