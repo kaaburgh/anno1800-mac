@@ -63,7 +63,7 @@ Target stock macOS userland first.
 - Never overwrite an existing wrapper or prefix without an explicit destructive flag and a clear message.
 - Prefer exact upstream release metadata over copied version strings from forum posts.
 
-Before publishing shell changes, run `bash -n` on changed shell scripts. Before publishing Python changes, compile-check them with `python3 -m py_compile` where Python is available.
+Before publishing script changes, run `make check`. It performs shell syntax checks and Python compile checks without adding project-specific CI infrastructure.
 
 ## Scope control
 
