@@ -12,7 +12,7 @@ The first target is an M3 Max MacBook. CrossOver may be used later as a known-go
 4. If it fails while CrossOver works, reduce the delta systematically and patch only the layer shown to be responsible.
 5. Only after that consider replacing the prebuilt Wine engine with a self-built CodeWeavers/upstream Wine.
 
-D3DMetal is free to use in this context but is an Apple closed-source component. A later fully-FOSS renderer path (for example Anno's DX11 path through DXMT) is optional and is **not** part of the initial success criterion.
+D3DMetal is an Apple closed-source component with its own restrictive license. Using the Sikarugir D3DMetal path does not introduce a paid CrossOver dependency; redistribution and other uses remain governed by Apple's license. A later fully-FOSS renderer path (for example Anno's DX11 path through DXMT) is optional and is **not** part of the initial success criterion.
 
 ## Start here
 
