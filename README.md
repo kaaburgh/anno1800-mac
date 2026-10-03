@@ -2,7 +2,7 @@
 
 Make **Anno 1800 playable on Apple Silicon without a CrossOver license** using a free macOS Wine stack, while keeping every experiment observable and reproducible.
 
-The first target is an M3 Max MacBook. CrossOver may be used later as a known-good reference, but the target runtime must not require a paid CrossOver installation or license.
+The first target is an M3 Max MacBook. The owned Anno 1800 copy is the Steam edition, so the first launcher path is Windows Steam in the wrapper, with Ubisoft Connect used only as required by the Steam-launched game. CrossOver may be used later as a known-good reference, but the target runtime must not require a paid CrossOver installation or license.
 
 ## Current strategy
 
