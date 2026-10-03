@@ -6,7 +6,7 @@ Run Anno 1800 on the first target machine (M3 Max Apple Silicon Mac) without req
 
 A successful initial solution may use:
 
-- Sikarugir / Porting Kit;
+- Sikarugir;
 - a freely available Wine engine;
 - Rosetta 2;
 - Apple's D3DMetal / Game Porting Toolkit components;
@@ -30,7 +30,7 @@ Each rung is independently useful and should be recorded.
 
 ### A0 — free runtime exists
 
-A Sikarugir/Porting Kit wrapper can be created on the target Mac with D3DMetal selected and a 64-bit Wine prefix available.
+A Sikarugir wrapper can be created on the target Mac with D3DMetal selected and a 64-bit Wine prefix available.
 
 ### A1 — launcher works
 
@@ -84,8 +84,7 @@ Do not start here. A custom Wine build is a diagnostic/tooling milestone, not th
 ## Experiment order
 
 1. Run `scripts/doctor.sh`.
-2. Install/use current Sikarugir or Porting Kit.
-3. Create one dedicated Anno wrapper.
+2. Create one dedicated Anno wrapper with the repository bootstrap.
 4. Capture `pre-launcher`.
 5. Select D3DMetal; capture `d3dmetal-base`.
 6. Install the relevant Windows launcher; capture `launcher-installed`.
@@ -118,6 +117,6 @@ Avoid:
 
 Stop adding complexity when A4 is reached.
 
-If a simple Sikarugir/Porting Kit configuration already survives a clean rebuild and real gameplay, the correct result is documentation and automation, not an artificial compatibility patch.
+If a simple Sikarugir configuration already survives a clean rebuild and real gameplay, the correct result is documentation and automation, not an artificial compatibility patch.
 
 If a failure is proven to be inside a closed component such as D3DMetal, preserve the minimal reproducer and consider the DX11/DXMT alternative rather than pretending the Wine layer can necessarily fix it.
