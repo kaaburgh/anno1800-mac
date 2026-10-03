@@ -18,7 +18,7 @@ printf 'name=%s\n' "$(basename "$wrapper")"
 if [[ -f "$plist" ]]; then
   echo
   echo "[plist]"
-  for key in "D3DMETAL" "DXMT" "DXVK" "D9VK" "CNC_DDRAW" "FASTMATH" "METAL_HUD" "Debug Mode" "WINEDEBUG" "MOLTENVKCX" "WINEESYNC" "WINEMSYNC" "Program Name and Path" "Program Flags" "Skip Gecko" "Skip Mono" "CFBundleShortVersionString" "CFBundleVersion"; do
+  for key in "D3DMETAL" "DXMT" "DXVK" "FASTMATH" "METAL_HUD" "WINEESYNC" "WINEMSYNC" "Program Name and Path" "Program Flags" "CFBundleShortVersionString" "CFBundleVersion"; do
     if value="$(plutil -extract "$key" raw -o - "$plist" 2>/dev/null)"; then
       printf '%s=%s\n' "$key" "$value"
     fi
@@ -29,23 +29,20 @@ fi
 
 echo
 echo "[renderer]"
-if [[ -d "$renderer_dir" ]]; then
-  for version_file in "$renderer_dir"/*/version; do
-    [[ -f "$version_file" ]] || continue
-    renderer_name="$(basename "$(dirname "$version_file")")"
+for renderer_name in d3dmetal dxmt dxvk; do
+  version_file="$renderer_dir/$renderer_name/version"
+  if [[ -f "$version_file" ]]; then
     printf '%s=%s\n' "$renderer_name" "$(paste -sd ' ' "$version_file")"
-  done
-
-  d3dmetal_plist="$renderer_dir/d3dmetal/external/D3DMetal.framework/Versions/A/Resources/Info.plist"
-  if [[ -f "$d3dmetal_plist" ]]; then
-    for key in CFBundleShortVersionString CFBundleVersion; do
-      if value="$(plutil -extract "$key" raw -o - "$d3dmetal_plist" 2>/dev/null)"; then
-        printf 'd3dmetal_%s=%s\n' "$key" "$value"
-      fi
-    done
   fi
-else
-  echo "renderer_dir=missing"
+done
+
+d3dmetal_plist="$renderer_dir/d3dmetal/external/D3DMetal.framework/Versions/A/Resources/Info.plist"
+if [[ -f "$d3dmetal_plist" ]]; then
+  for key in CFBundleShortVersionString CFBundleVersion; do
+    if value="$(plutil -extract "$key" raw -o - "$d3dmetal_plist" 2>/dev/null)"; then
+      printf 'd3dmetal_%s=%s\n' "$key" "$value"
+    fi
+  done
 fi
 
 echo
