@@ -160,8 +160,18 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$tmpdir/template"
-tar -xf "$template_archive" -C "$tmpdir/template"
+mkdir -p "$tmpdir/template" "$tmpdir/engine"
+if ! tar -xf "$template_archive" -C "$tmpdir/template"; then
+  echo "Could not extract cached template archive: $template_archive" >&2
+  echo "Delete that archive and rerun the bootstrap." >&2
+  exit 1
+fi
+if ! tar -xf "$engine_archive" -C "$tmpdir/engine"; then
+  echo "Could not extract cached engine archive: $engine_archive" >&2
+  echo "Delete that archive and rerun the bootstrap." >&2
+  exit 1
+fi
+
 template_apps=()
 while IFS= read -r item; do
   template_apps[${#template_apps[@]}]="$item"
@@ -171,13 +181,7 @@ if (( ${#template_apps[@]} != 1 )); then
   printf '  %s\n' "${template_apps[@]:-}" >&2
   exit 1
 fi
-cp -R "${template_apps[0]}" "$wrapper"
-wrapper_created=1
 
-shared="$wrapper/Contents/SharedSupport"
-mkdir -p "$shared"
-mkdir -p "$tmpdir/engine"
-tar -xf "$engine_archive" -C "$tmpdir/engine"
 bundles=()
 while IFS= read -r item; do
   bundles[${#bundles[@]}]="$item"
@@ -187,6 +191,11 @@ if (( ${#bundles[@]} != 1 )); then
   printf '  %s\n' "${bundles[@]:-}" >&2
   exit 1
 fi
+
+wrapper_created=1
+cp -R "${template_apps[0]}" "$wrapper"
+shared="$wrapper/Contents/SharedSupport"
+mkdir -p "$shared"
 cp -R "${bundles[0]}" "$shared/wine"
 
 launcher="$wrapper/Contents/MacOS/Sikarugir"
@@ -197,13 +206,19 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 if (( create_prefix )); then
   echo "Creating Wine prefix..."
   "$launcher" WSS-wineprefixcreate
+  prefix="$wrapper/Contents/SharedSupport/prefix"
+  if [[ ! -d "$prefix/drive_c/windows" || ! -d "$prefix/drive_c/Program Files (x86)" ]]; then
+    echo "Prefix creation did not produce a usable 64-bit (WoW64) prefix:" >&2
+    echo "  $prefix" >&2
+    exit 1
+  fi
 fi
 
 if (( capture )); then
   bash "$script_dir/capture-baseline.sh" \
     --wrapper "$wrapper" \
-    --label fresh-sikarugir-pre-renderer \
-    --note "Fresh wrapper assembled from official Sikarugir engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
+    --label fresh-sikarugir-upstream-default-renderer \
+    --note "Fresh wrapper at upstream default renderer state (current Sikarugir documentation names DXMT as default); engine=$engine engine_sha256=$engine_sha256 template=$template template_sha256=$template_sha256"
 fi
 
 if (( enable_d3dmetal )); then
