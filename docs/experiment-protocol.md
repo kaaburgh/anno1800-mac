@@ -39,7 +39,7 @@ By default:
 - Homebrew and wrapper-tool versions where discoverable;
 - Sikarugir wrapper engine identity;
 - selected renderer-related plist keys;
-- prefix existence and registry hashes;
+- canonical Sikarugir prefix (`Contents/SharedSupport/prefix`) existence and registry hashes;
 - common Steam / Ubisoft / Anno executable locations;
 - relevant running process names;
 - hashes of small configuration files.
