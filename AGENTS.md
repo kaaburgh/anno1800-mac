@@ -4,7 +4,7 @@
 
 Make Anno 1800 playable on Apple Silicon without a paid CrossOver dependency.
 
-Read `PLAN.md` before making changes. The first target is an M3 Max Mac. The initial preferred stack is Sikarugir / Porting Kit + Wine + D3DMetal.
+Read `PLAN.md` before making changes. The first target is an M3 Max Mac. The initial preferred stack is a direct Sikarugir wrapper + Wine + D3DMetal.
 
 ## Decision order
 
@@ -34,11 +34,28 @@ Use `scripts/capture-baseline.sh` before and after important configuration chang
 
 ## External dependencies
 
-Reuse Sikarugir, Porting Kit, Wine engines, D3DMetal and other established infrastructure rather than reimplementing a general-purpose wrapper here.
+Reuse Sikarugir, Wine engines, D3DMetal and other established infrastructure rather than reimplementing a general-purpose wrapper here.
 
 Do not pin or replace a Wine engine merely because another game's recipe uses it. A version becomes Anno-specific only after evidence from this project.
 
 When an external recipe suggests a tweak, record why it is being tried and retain it only if it changes the observed result.
+
+## Deliberate minimalism for reviews
+
+This repository intentionally does **not** pre-harden hypothetical configurations or environments. Review findings should be tied to the current Anno 1800 experiment, an observed failure, or a cheap invariant on the main execution path.
+
+In particular, do not reintroduce without evidence:
+
+- generic wrapper CLI commands or bootstrap escape hatches such as skipping prefix creation, D3DMetal selection, or captures;
+- Porting Kit / Sikarugir Creator / Homebrew as parallel Step A execution paths;
+- D3D9, DirectDraw, or unrelated renderer settings such as D9VK/CNC_DDRAW into the Anno renderer strategy;
+- generic renderer inventories beyond the D3DMetal / DXMT / DXVK paths relevant to Anno's DX11/DX12 modes;
+- validation of an explicitly pinned Wine engine against the current upstream engine list;
+- rare shell/environment compatibility guards for conditions not observed on the target machine.
+
+Keep safeguards that protect data or verify a main-path invariant: do not overwrite wrappers/captures, validate downloaded archives before use, verify prefix creation, back up modified plist files, and avoid leaking credentials.
+
+If a currently omitted case becomes a real failure, add the smallest fix together with the evidence that required it.
 
 ## Safety and legal boundaries
 
