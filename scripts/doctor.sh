@@ -5,7 +5,6 @@ fail=0
 warn=0
 
 pass() { printf 'PASS  %s\n' "$*"; }
-info() { printf 'INFO  %s\n' "$*"; }
 warning() { printf 'WARN  %s\n' "$*"; warn=$((warn + 1)); }
 failure() { printf 'FAIL  %s\n' "$*" >&2; fail=$((fail + 1)); }
 
@@ -24,7 +23,7 @@ fi
 
 if command -v sw_vers >/dev/null 2>&1; then
   macos="$(sw_vers -productVersion)"
-  IFS=. read -r major minor patch <<< "$macos"
+  IFS=. read -r major minor _patch <<< "$macos"
   major="${major:-0}"
   minor="${minor:-0}"
   if (( major > 14 || (major == 14 && minor >= 6) )); then
@@ -44,37 +43,13 @@ if [[ "$arch" == "arm64" ]]; then
   fi
 fi
 
-if command -v brew >/dev/null 2>&1; then
-  pass "Homebrew: $(brew --version 2>/dev/null | head -n 1)"
-else
-  warning "Homebrew not found (optional for direct bootstrap; needed for the Sikarugir Creator cask)"
-fi
-
-if [[ -d "/Applications/Sikarugir Creator.app" ]]; then
-  version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "/Applications/Sikarugir Creator.app/Contents/Info.plist" 2>/dev/null || echo unknown)"
-  pass "Sikarugir Creator installed: $version"
-elif command -v brew >/dev/null 2>&1 && brew list --cask sikarugir >/dev/null 2>&1; then
-  pass "Sikarugir Homebrew cask installed"
-else
-  warning "Sikarugir Creator not detected"
-  info "Current upstream install:"
-  info "  brew trust Sikarugir-App/sikarugir"
-  info "  brew install --cask Sikarugir-App/sikarugir/sikarugir"
-fi
-
-portingkit=""
-for candidate in "/Applications/Porting Kit.app" "$HOME/Applications/Porting Kit.app"; do
-  if [[ -d "$candidate" ]]; then
-    portingkit="$candidate"
-    break
+for tool in curl tar shasum plutil; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    pass "$tool available"
+  else
+    failure "$tool is required by the direct bootstrap"
   fi
 done
-if [[ -n "$portingkit" ]]; then
-  version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$portingkit/Contents/Info.plist" 2>/dev/null || echo unknown)"
-  pass "Porting Kit detected: $version"
-else
-  info "Porting Kit not detected (optional if using Sikarugir directly)"
-fi
 
 free_kb="$(df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print $4}')"
 if [[ "$free_kb" =~ ^[0-9]+$ ]]; then
@@ -86,12 +61,6 @@ if [[ "$free_kb" =~ ^[0-9]+$ ]]; then
   else
     failure "Only ~${free_gb} GiB free; make more room before installing Anno"
   fi
-fi
-
-if command -v git >/dev/null 2>&1; then
-  pass "git: $(git --version)"
-else
-  warning "git not found; not required to play, but needed to work on this repository normally"
 fi
 
 printf '\nSummary: %d failure(s), %d warning(s).\n' "$fail" "$warn"
