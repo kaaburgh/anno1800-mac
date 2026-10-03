@@ -21,6 +21,7 @@ D3DMetal is free to use in this context but is an Apple closed-source component.
 - [docs/experiment-protocol.md](docs/experiment-protocol.md) — how to make runs comparable.
 - [docs/reference-stack.md](docs/reference-stack.md) — external projects we intentionally reuse.
 - [scripts/doctor.sh](scripts/doctor.sh) — non-destructive host preflight.
+- [scripts/bootstrap-sikarugir-wrapper.sh](scripts/bootstrap-sikarugir-wrapper.sh) — assemble a clean wrapper from the current official Sikarugir engine/template catalog, initialize its prefix, enable D3DMetal, and capture A0.
 - [scripts/capture-baseline.sh](scripts/capture-baseline.sh) — capture a wrapper/runtime snapshot.
 - [scripts/enable-d3dmetal.sh](scripts/enable-d3dmetal.sh) — make D3DMetal the selected Sikarugir renderer.
 - [scripts/sikarugir-wrapper.sh](scripts/sikarugir-wrapper.sh) — small CLI around the wrapper launcher.
