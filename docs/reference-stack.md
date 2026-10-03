@@ -44,7 +44,9 @@ This project is useful evidence for current Sikarugir wrapper internals and CLI 
 
 - `Contents/MacOS/Sikarugir`
 - `Contents/SharedSupport/wine`
-- `Contents/drive_c`
+- `Contents/SharedSupport/prefix` as the canonical `WINEPREFIX`
+- `Contents/SharedSupport/prefix/drive_c` as the canonical C: drive location
+- `Contents/drive_c` as a convenience/compatibility shortcut when present
 - renderer settings in `Contents/Info.plist`
 
 We deliberately do **not** copy its pinned Wine engine choice into the Anno plan. A working engine for one Steam game is not evidence that the same engine is optimal for Anno 1800.
