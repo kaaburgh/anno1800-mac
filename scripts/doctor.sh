@@ -47,7 +47,7 @@ fi
 if command -v brew >/dev/null 2>&1; then
   pass "Homebrew: $(brew --version 2>/dev/null | head -n 1)"
 else
-  failure "Homebrew not found"
+  warning "Homebrew not found (optional for direct bootstrap; needed for the Sikarugir Creator cask)"
 fi
 
 if [[ -d "/Applications/Sikarugir Creator.app" ]]; then
