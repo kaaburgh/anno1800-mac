@@ -37,7 +37,11 @@ repo_dir="$(cd "$script_dir/.." && pwd)"
 safe_label="$(printf '%s' "$label" | tr -cs 'A-Za-z0-9._-' '-')"
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 out="$repo_dir/artifacts/${timestamp}-${safe_label}"
-mkdir -p "$out"
+mkdir -p "$repo_dir/artifacts"
+if ! mkdir "$out"; then
+  echo "Capture already exists; refusing to overwrite: $out" >&2
+  exit 1
+fi
 
 {
   echo "captured_utc=$timestamp"
