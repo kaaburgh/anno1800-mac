@@ -14,24 +14,20 @@ plist="$wrapper/Contents/Info.plist"
 [[ -f "$plist" ]] || { echo "Info.plist not found: $plist" >&2; exit 1; }
 command -v plutil >/dev/null 2>&1 || { echo "plutil is required" >&2; exit 1; }
 
-timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
-backup="$plist.anno1800-mac.$timestamp.bak"
-cp -p "$plist" "$backup"
-
 has_key() {
   plutil -extract "$1" raw -o - "$plist" >/dev/null 2>&1
 }
 
-set_int() {
-  local key="$1" value="$2"
-  if has_key "$key"; then
-    plutil -replace "$key" -integer "$value" "$plist"
-  else
-    plutil -insert "$key" -integer "$value" "$plist"
-  fi
-}
+if ! has_key "D3DMETAL"; then
+  echo "Expected D3DMETAL key is missing; the Sikarugir template layout may have changed." >&2
+  exit 1
+fi
 
-set_int "D3DMETAL" 1
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+backup="$plist.anno1800-mac.$timestamp.bak"
+cp -p "$plist" "$backup"
+
+plutil -replace "D3DMETAL" -integer 1 "$plist"
 
 # For Anno's D3D11/D3D12 baseline, disable alternate D3D10/D3D11 renderer
 # toggles. Only touch keys the wrapper already defines.
@@ -44,7 +40,7 @@ done
 echo "Updated: $plist"
 echo "Backup:  $backup"
 echo
-for key in D3DMETAL DXMT DXVK MOLTENVKCX WINEESYNC WINEMSYNC; do
+for key in D3DMETAL DXMT DXVK WINEESYNC WINEMSYNC; do
   if has_key "$key"; then
     value="$(plutil -extract "$key" raw -o - "$plist" 2>/dev/null || true)"
     printf '%-12s %s\n' "$key" "$value"
