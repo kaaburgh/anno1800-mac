@@ -34,14 +34,9 @@ A Sikarugir wrapper can be created on the target Mac with D3DMetal selected and 
 
 ### A1 — launcher works
 
-The store/launcher route used by the owned copy of Anno works far enough to authenticate and install or discover Anno 1800.
+The owned copy of Anno 1800 is the Steam edition. Windows Steam in the wrapper must work far enough to authenticate and install/discover Anno 1800. Launching Anno may then start or install Ubisoft Connect as required by the game.
 
-Two routes are allowed:
-
-- Ubisoft route: Ubisoft Connect directly in the wrapper.
-- Steam route: Windows Steam in the wrapper, then Ubisoft Connect as required by Anno.
-
-Do not choose one globally until the actual owned edition is known.
+The first experiment therefore uses the Steam route only. Do not add a parallel direct-Ubisoft setup unless the Steam-owned path demonstrates a failure that requires it.
 
 ### A2 — game boots
 
@@ -85,8 +80,8 @@ Do not start here. A custom Wine build is a diagnostic/tooling milestone, not th
 
 1. Run `scripts/doctor.sh`.
 2. Run the repository bootstrap to create one dedicated Anno wrapper, verify its prefix, and capture the upstream-default and D3DMetal A0 states.
-3. Install the relevant Windows launcher; capture `launcher-installed`.
-4. Install/discover Anno; capture `anno-installed`.
+3. Install Windows Steam in the wrapper, make it the wrapper program, sign in, and capture `steam-working`.
+4. Install/discover Anno through Steam; capture `anno-installed`. Allow Steam/Anno to start or install Ubisoft Connect as required.
 5. Try DX12 first when using D3DMetal, but keep DX11 as an explicit comparison rather than an assumption.
 6. Capture `main-menu` and first stable `gameplay` state.
 7. If successful, repeat from a clean wrapper before debugging anything deeper.
