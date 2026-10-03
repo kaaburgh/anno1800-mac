@@ -24,7 +24,7 @@ Treat the upstream README as authoritative for installation commands because the
 
 https://www.portingkit.com/
 
-Porting Kit is useful as the higher-level workflow/UI. The project plan allows using it for Step A, but the evidence we capture should still identify the resulting wrapper, Wine engine, renderer, and prefix state.
+Porting Kit is useful reference material for higher-level Sikarugir workflows. It is intentionally **not** a parallel Step A execution path in this repository; the first experiment uses the direct bootstrap so there is one path to observe and debug.
 
 ## D3DMetal / Game Porting Toolkit
 
