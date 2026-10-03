@@ -33,7 +33,7 @@ if [[ -d "$renderer_dir" ]]; then
   for version_file in "$renderer_dir"/*/version; do
     [[ -f "$version_file" ]] || continue
     renderer_name="$(basename "$(dirname "$version_file")")"
-    printf '%s=%s\n' "$renderer_name" "$(cat "$version_file")"
+    printf '%s=%s\n' "$renderer_name" "$(paste -sd ' ' "$version_file")"
   done
 
   d3dmetal_plist="$renderer_dir/d3dmetal/external/D3DMetal.framework/Versions/A/Resources/Info.plist"
