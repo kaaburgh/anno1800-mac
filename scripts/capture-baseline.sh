@@ -63,38 +63,32 @@ fi
   else
     echo "rosetta_x86_64=no"
   fi
-
-  echo
-  echo "[tools]"
-  if command -v brew >/dev/null 2>&1; then
-    brew --version 2>/dev/null | head -n 1 || true
-    brew list --versions 2>/dev/null | grep -Ei 'sikarugir|wine|porting' || true
-  fi
-  for app in "/Applications/Sikarugir Creator.app" "/Applications/Porting Kit.app" "$HOME/Applications/Porting Kit.app"; do
-    if [[ -f "$app/Contents/Info.plist" ]]; then
-      version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist" 2>/dev/null || echo unknown)"
-      printf 'app=%s version=%s\n' "$(basename "$app")" "$version"
-    fi
-  done
 } > "$out/host.txt"
 
 bash "$script_dir/inspect-wrapper.sh" "$wrapper" > "$out/wrapper.txt"
 
 {
   echo "[relevant-processes]"
-  ps -axo pid=,ppid=,etime=,comm= 2>/dev/null |
-    grep -Ei 'wine|wineserver|anno|ubisoft|steam|sikarugir' || true
+  ps -axo comm= 2>/dev/null |
+    grep -Ei 'wine|wineserver|anno|ubisoft|steam|sikarugir' |
+    awk -F/ '{print $NF}' |
+    sort -fu || true
 } > "$out/processes.txt"
 
+hash_file() {
+  local label="$1" path="$2"
+  if [[ -f "$path" ]]; then
+    printf '%s_sha256=' "$label"
+    shasum -a 256 "$path" | awk '{print $1}'
+  fi
+}
+
 {
-  plist="$wrapper/Contents/Info.plist"
-  [[ -f "$plist" ]] && shasum -a 256 "$plist"
-  for reg in user.reg system.reg userdef.reg; do
-    path="$prefix/$reg"
-    [[ -f "$path" ]] && shasum -a 256 "$path"
-  done
-  version="$wrapper/Contents/SharedSupport/wine/version"
-  [[ -f "$version" ]] && shasum -a 256 "$version"
+  hash_file "Info.plist" "$wrapper/Contents/Info.plist"
+  hash_file "prefix/user.reg" "$prefix/user.reg"
+  hash_file "prefix/system.reg" "$prefix/system.reg"
+  hash_file "prefix/userdef.reg" "$prefix/userdef.reg"
+  hash_file "wine/version" "$wrapper/Contents/SharedSupport/wine/version"
 } > "$out/hashes.txt"
 
 cat > "$out/README.txt" <<'EOF'
