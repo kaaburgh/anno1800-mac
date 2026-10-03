@@ -65,27 +65,38 @@ For Anno, the renderer hypothesis is deliberately limited to:
 
 Do not add unrelated renderer backends to the experiment merely because they exist in the generic Sikarugir template.
 
-## 4. Install the launcher route you actually own
+## 4. Install Steam
 
-Do not install both routes into the same first baseline.
+The owned copy of Anno 1800 is the Steam edition, so Steam is the only launcher route for the first experiment. Do not add a parallel direct-Ubisoft setup unless this route demonstrates a failure that requires it.
 
-### Ubisoft-owned copy
+Download the Windows Steam installer from Valve, then run it through the wrapper's own Sikarugir launcher. The installer path must be absolute:
 
-Install Ubisoft Connect in this wrapper and sign in normally.
+    wrapper="$HOME/Applications/Sikarugir/Anno1800.app"
+    "$wrapper/Contents/MacOS/Sikarugir" \
+      WSS-installer "/absolute/path/to/SteamSetup.exe"
 
-### Steam-owned copy
+After Steam is installed, make it the wrapper program so opening the app starts Steam:
 
-Install Windows Steam in this wrapper, sign in, then allow the owned Anno installation to install/use Ubisoft Connect as required.
+    plutil -replace "Program Name and Path" \
+      -string "/Program Files (x86)/Steam/steam.exe" \
+      "$wrapper/Contents/Info.plist"
+
+Then start the wrapper and sign in to Steam:
+
+    open "$wrapper"
+
+Capture the working Steam state:
+
+    bash scripts/capture-baseline.sh \
+      --wrapper "$wrapper" \
+      --label steam-working \
+      --note "Windows Steam starts and authentication succeeds."
 
 A recent independent Sikarugir project demonstrates that a Windows Steam wrapper with D3DMetal can be assembled without CrossOver. We use that as implementation evidence, not as proof that its pinned engine is the right Anno engine.
 
-After the launcher is working:
-
-    bash scripts/capture-baseline.sh \
-      --wrapper "/path/to/Anno1800.app" \
-      --label launcher-working
-
 ## 5. Install / discover Anno
+
+Install Anno 1800 from the owned Steam library. On first launch, allow Steam/Anno to install or start Ubisoft Connect as required; do not create a separate Ubisoft-first route unless this path fails.
 
 Once Anno is installed:
 
