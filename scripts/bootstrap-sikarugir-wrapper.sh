@@ -60,6 +60,15 @@ done
 command -v curl >/dev/null 2>&1 || { echo "curl is required" >&2; exit 1; }
 command -v tar >/dev/null 2>&1 || { echo "tar is required" >&2; exit 1; }
 
+macos="$(sw_vers -productVersion 2>/dev/null || true)"
+IFS=. read -r macos_major macos_minor _rest <<< "$macos"
+macos_major="${macos_major:-0}"
+macos_minor="${macos_minor:-0}"
+if (( macos_major < 14 || (macos_major == 14 && macos_minor < 6) )); then
+  echo "Current Sikarugir requires macOS 14.6 or later (got $macos)" >&2
+  exit 1
+fi
+
 if ! /usr/bin/arch -x86_64 /usr/bin/true >/dev/null 2>&1; then
   echo "Rosetta 2 is required. Install it with:" >&2
   echo "  /usr/sbin/softwareupdate --install-rosetta --agree-to-license" >&2
