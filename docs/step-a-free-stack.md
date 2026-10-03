@@ -13,13 +13,13 @@ The script does not install anything. It checks:
 - Apple Silicon;
 - macOS version;
 - Rosetta execution;
-- Homebrew;
+- Homebrew (optional for the direct bootstrap; useful for the Creator GUI path);
 - Sikarugir / Porting Kit presence;
 - free disk space.
 
 Current Sikarugir upstream documents macOS 14.6+ and Rosetta 2 for Apple Silicon.
 
-If Sikarugir is not installed, use the current upstream Homebrew instructions rather than copying an old command from a forum:
+The direct bootstrap in the next section does **not** require Homebrew or Sikarugir Creator. If you prefer the Creator GUI, use the current upstream Homebrew instructions rather than copying an old command from a forum:
 
     brew upgrade
     brew trust Sikarugir-App/sikarugir
